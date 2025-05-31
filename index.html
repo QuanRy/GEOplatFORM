@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ЭкоМонитор Волгоград</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/5.13.2/reset.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/5.13.2/antd.min.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      padding: 2rem;
+      margin: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 2.5rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgb(0 0 0 / 0.08);
+    }
+    h1, h2, h3 {
+      color: #2f3b52;
+      margin-bottom: 1rem;
+    }
+    #map {
+      height: 60vh;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
+    }
+    .info-block {
+      margin-top: 1rem;
+    }
+    #segment-info {
+      padding: 1rem;
+      background: #fafafa;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      min-height: 80px;
+      color: #595959;
+      font-size: 1rem;
+      line-height: 1.5;
+      user-select: none;
+    }
+    #report-count {
+      font-weight: 600;
+      color: #1890ff;
+    }
+    .ant-input, textarea.ant-input {
+  width: 100%; 
+  max-width: 100%; 
+  padding: 12px 16px !important; 
+  font-size: 1.1rem;
+  border-radius: 6px;
+  border: 1.5px solid #d9d9d9;
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.1);
+  transition: all 0.3s ease;
+  box-sizing: border-box; 
+}
+    .ant-input:focus, textarea.ant-input:focus {
+      border-color: #40a9ff !important;
+      box-shadow: 0 0 6px #91d5ff !important;
+      outline: none;
+    }
+    input[type="file"].ant-input {
+      padding: 6px 11px !important;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    button.ant-btn-primary {
+  background-color: #1890ff; 
+  border-color: #1890ff;
+  color: #fff;
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 0.75rem 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(24 144 255 / 0.4);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+button.ant-btn-primary:hover,
+button.ant-btn-primary:focus {
+  background-color: #40a9ff; 
+  border-color: #40a9ff;
+  box-shadow: 0 6px 18px rgb(24 144 255 / 0.7);
+  outline: none;
+}
+    textarea.ant-input {
+        min-height: 160px; 
+  resize: vertical
+    }
+    .ant-form-item {
+      margin-bottom: 1.8rem;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.6rem;
+      color: #3a3a3a;
+    }
+    p {
+      color: #4a4a4a;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-top: 0.5rem;
+    }
+    .static-info {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f9f9f9;
+      border: 1px solid #e4e4e4;
+      border-radius: 8px;
+    }
+    .eco-why {
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ЭкоМонитор — Центральный район Волгограда</h1>
+
+    <div id="map"></div>
+
+    <div class="info-block">
+      <h2>Информация по сегменту:</h2>
+      <div id="segment-info">Нажмите на зону на карте.</div>
+
+      <h3>Количество обращений: <span id="report-count">0</span></h3>
+    </div>
+
+    <div class="static-info">
+      <h3>Пункты приёма отходов</h3>
+      <p><strong>Макулатура:</strong> Пр. им. В.И.Ленина 20, ул. Советская 43, ул. 7-й гвардейской 16, Пр. им. В.И.Ленина 51, ул. Пархоменко 59а</p>
+      <p><strong>Пластиковые бутылки:</strong> Комсомольский сад, ул. Ленина, Привокзальная площадь 1</p>
+    </div>
+
+    <form id="upload-form" class="ant-form ant-form-vertical" enctype="multipart/form-data" novalidate>
+      <h3 style="margin-top: 3rem;">Оставить обращение</h3>
+
+      <div class="ant-form-item">
+        <label for="segment">Сегмент</label>
+        <input type="text" id="segment" name="segment" class="ant-input" placeholder="Введите цифру сегмента" required autocomplete="off" />
+      </div>
+
+      <div class="ant-form-item">
+        <label for="text">Текст обращения</label>
+        <textarea id="text" name="text" class="ant-input" rows="4" placeholder="Опишите проблему или пожелание" required></textarea>
+      </div>
+
+      <div class="ant-form-item">
+        <label for="photo">Фото (необязательно)</label>
+        <input type="file" id="photo" name="photo" class="ant-input" accept="image/*" />
+      </div>
+
+      <button type="submit" class="ant-btn ant-btn-primary ant-btn-lg">Отправить</button>
+    </form>
+
+    <div class="eco-why">
+      <h3>Почему нужно сортировать мусор?</h3>
+      <p>Сортировка мусора — это простой, но очень важный шаг для защиты окружающей среды. Когда мы разделяем отходы (пластик, стекло, бумагу, металл), их можно переработать и использовать повторно. Это уменьшает количество мусора на свалках, сокращает загрязнение природы и экономит ресурсы.</p>
+      <p>Кроме того, переработка снижает вредные выбросы, так как производство из вторичного сырья требует меньше энергии. Например, переработанная бумага спасает деревья, а переплавленный пластик — нефть.</p>
+      <p>Сортировка мусора — это вклад каждого в здоровье планеты. Даже небольшие действия имеют значение!</p>
+    </div>
+  </div>
+
+  <div id="modal-root"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/5.13.2/antd.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
