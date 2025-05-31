@@ -105,7 +105,7 @@ form.addEventListener('submit', async (e) => {
     showNotification(result.message || 'Обращение успешно добавлено!');
 
    
-    const updated = await fetch('/data.json').then(res => res.json());
+    const updated = await fetch('/json/data.json').then(res => res.json());
     segmentData = updated;
 
     document.getElementById('report-count').innerText = updated.meta.total_reports;

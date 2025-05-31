@@ -35,11 +35,29 @@
           "text": "Бак с макулатурой переполнен у ТЦ Европа",
           "photo": "uploads/sample1.jpg",
           "date": "2025-05-27"
+        },
+        {
+          "type": "замечание",
+          "text": "вавав",
+          "photo": null,
+          "date": "2025-05-31"
+        },
+        {
+          "type": "замечание",
+          "text": "dfdf",
+          "photo": null,
+          "date": "2025-05-31"
+        },
+        {
+          "type": "замечание",
+          "text": "вав",
+          "photo": null,
+          "date": "2025-05-31"
         }
       ]
     }
   },
   "meta": {
-    "total_reports": 1
+    "total_reports": 4
   }
 }
