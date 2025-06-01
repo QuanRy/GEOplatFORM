@@ -1,0 +1,176 @@
+CREATE DATABASE geoplatform_db
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'Russian_Russia.1251'
+    LC_CTYPE = 'Russian_Russia.1251'
+    LOCALE_PROVIDER = 'libc'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+
+-- Таблица сегментов (районов)
+CREATE TABLE IF NOT EXISTS segments (
+    id SERIAL PRIMARY KEY,
+    segment_id INT UNIQUE NOT NULL,
+    name TEXT NOT NULL
+);
+
+-- Координаты
+CREATE TABLE IF NOT EXISTS coords (
+    id SERIAL PRIMARY KEY,
+    segment_id INT NOT NULL REFERENCES segments(segment_id),
+    latitude FLOAT NOT NULL,
+    longitude FLOAT NOT NULL,
+    seq INT NOT NULL,
+    UNIQUE (segment_id, seq)
+);
+
+-- Пункты переработки
+CREATE TABLE IF NOT EXISTS recycling_points (
+    id SERIAL PRIMARY KEY,
+    segment_id INT NOT NULL REFERENCES segments(segment_id),
+    material_type TEXT NOT NULL,
+    address TEXT NOT NULL,
+    UNIQUE (segment_id, material_type, address)
+);
+
+-- Отчёты (добавлены координаты)
+CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY,
+    segment_id INT NOT NULL REFERENCES segments(segment_id),
+    report_type TEXT NOT NULL,
+    text TEXT NOT NULL,
+    photo TEXT,
+    date DATE NOT NULL,
+    latitude FLOAT,
+    longitude FLOAT,
+    UNIQUE (segment_id, report_type, text, date)
+);
+
+
+INSERT INTO segments (segment_id, name) VALUES
+  (1, 'Центральный район — квартал 1'),
+  (2, 'Тракторозаводский район'),
+  (3, 'Краснооктябрьский район'),
+  (4, 'Дзержинский район'),
+  (5, 'Ворошиловский район'),
+  (6, 'Советский район'),
+  (7, 'Кировский район'),
+  (8, 'Красноармейский район')
+ON CONFLICT (segment_id) DO NOTHING;
+
+
+INSERT INTO coords (segment_id, latitude, longitude, seq) VALUES
+  (1, 48.709, 44.512, 1),
+  (1, 48.709, 44.514, 2),
+  (1, 48.707, 44.514, 3),
+  (1, 48.707, 44.512, 4),
+
+  (2, 48.800, 44.600, 1),
+  (2, 48.800, 44.620, 2),
+  (2, 48.780, 44.620, 3),
+  (2, 48.780, 44.600, 4),
+
+  (3, 48.790, 44.580, 1),
+  (3, 48.790, 44.600, 2),
+  (3, 48.770, 44.600, 3),
+  (3, 48.770, 44.580, 4),
+
+  (4, 48.760, 44.560, 1),
+  (4, 48.760, 44.580, 2),
+  (4, 48.740, 44.580, 3),
+  (4, 48.740, 44.560, 4),
+
+  (5, 48.730, 44.540, 1),
+  (5, 48.730, 44.560, 2),
+  (5, 48.710, 44.560, 3),
+  (5, 48.710, 44.540, 4),
+
+  (6, 48.700, 44.520, 1),
+  (6, 48.700, 44.540, 2),
+  (6, 48.680, 44.540, 3),
+  (6, 48.680, 44.520, 4),
+
+  (7, 48.670, 44.500, 1),
+  (7, 48.670, 44.520, 2),
+  (7, 48.650, 44.520, 3),
+  (7, 48.650, 44.500, 4),
+
+  (8, 48.640, 44.480, 1),
+  (8, 48.640, 44.500, 2),
+  (8, 48.620, 44.500, 3),
+  (8, 48.620, 44.480, 4)
+ON CONFLICT (segment_id, seq) DO NOTHING;
+
+INSERT INTO recycling_points (segment_id, material_type, address) VALUES
+  (1, 'paper', 'ул. Ленина 5'),
+  (1, 'paper', 'ул. Мира 22'),
+  (1, 'plastic', 'ул. Гагарина 10'),
+  (2, 'paper', 'ул. Заводская 10'),
+  (3, 'plastic', 'пр. Металлургов 5'),
+  (4, 'paper', 'ул. Дзержинского 15'),
+  (5, 'plastic', 'ул. Советская 20'),
+  (6, 'paper', 'пр. Университетский 30'),
+  (7, 'plastic', 'ул. Кирова 25'),
+  (8, 'paper', 'ул. Красноармейская 40')
+ON CONFLICT (segment_id, material_type, address) DO NOTHING;
+
+INSERT INTO reports (segment_id, report_type, text, photo, date, latitude, longitude) VALUES
+-- Центральный район — квартал 1
+(1, 'overflow', 'Контейнеры переполнены', 'photo1.jpg', '2024-05-01', 48.708, 44.513),
+(1, 'damage', 'Повреждён контейнер', 'photo2.jpg', '2024-05-02', 48.7075, 44.5135),
+(1, 'overflow', 'Нет вывоза мусора уже неделю', 'photo3.jpg', '2024-05-03', 48.7085, 44.5125),
+(1, 'missing', 'Контейнер исчез', 'photo4.jpg', '2024-05-04', 48.707, 44.512),
+(1, 'overflow', 'Очень неприятный запах', 'photo5.jpg', '2024-05-05', 48.709, 44.5125),
+
+-- Тракторозаводский район
+(2, 'overflow', 'Мусор валяется на улице', 'photo6.jpg', '2024-05-01', 48.795, 44.610),
+(2, 'damage', 'Контейнер сломан', 'photo7.jpg', '2024-05-02', 48.798, 44.615),
+(2, 'missing', 'Нет контейнеров для бумаги', 'photo8.jpg', '2024-05-03', 48.782, 44.605),
+(2, 'overflow', 'Переполнены баки', 'photo9.jpg', '2024-05-04', 48.780, 44.612),
+(2, 'damage', 'Пластиковый бак треснул', 'photo10.jpg', '2024-05-05', 48.784, 44.618),
+
+-- Краснооктябрьский район
+(3, 'missing', 'Контейнеры были, но исчезли', 'photo11.jpg', '2024-05-01', 48.775, 44.590),
+(3, 'overflow', 'Свалка вокруг бака', 'photo12.jpg', '2024-05-02', 48.788, 44.588),
+(3, 'damage', 'Бак сгорел', 'photo13.jpg', '2024-05-03', 48.770, 44.599),
+(3, 'overflow', 'Вывозят слишком редко', 'photo14.jpg', '2024-05-04', 48.780, 44.590),
+(3, 'missing', 'Нет места для пластика', 'photo15.jpg', '2024-05-05', 48.785, 44.585),
+
+-- Дзержинский район
+(4, 'overflow', 'Бак полон', 'photo16.jpg', '2024-05-01', 48.750, 44.565),
+(4, 'damage', 'Контейнер в аварийном состоянии', 'photo17.jpg', '2024-05-02', 48.745, 44.570),
+(4, 'missing', 'Пропал контейнер для бумаги', 'photo18.jpg', '2024-05-03', 48.742, 44.575),
+(4, 'overflow', 'Слишком много отходов', 'photo19.jpg', '2024-05-04', 48.755, 44.578),
+(4, 'damage', 'Колесо у бака сломано', 'photo20.jpg', '2024-05-05', 48.748, 44.562),
+
+-- Ворошиловский район
+(5, 'missing', 'Контейнеры не установлены', 'photo21.jpg', '2024-05-01', 48.725, 44.550),
+(5, 'overflow', 'Мусор разлетается ветром', 'photo22.jpg', '2024-05-02', 48.715, 44.545),
+(5, 'damage', 'Дверца бака отломана', 'photo23.jpg', '2024-05-03', 48.728, 44.558),
+(5, 'overflow', 'Скопление мусора у дороги', 'photo24.jpg', '2024-05-04', 48.712, 44.553),
+(5, 'missing', 'Нужны баки для пластика', 'photo25.jpg', '2024-05-05', 48.719, 44.546),
+
+-- Советский район
+(6, 'overflow', 'Контейнеры завалены', 'photo26.jpg', '2024-05-01', 48.690, 44.530),
+(6, 'damage', 'Дырка в баке', 'photo27.jpg', '2024-05-02', 48.688, 44.535),
+(6, 'missing', 'Нет контейнеров', 'photo28.jpg', '2024-05-03', 48.682, 44.522),
+(6, 'overflow', 'Бак для бумаги полон', 'photo29.jpg', '2024-05-04', 48.699, 44.538),
+(6, 'damage', 'Невозможно открыть контейнер', 'photo30.jpg', '2024-05-05', 48.686, 44.524),
+
+-- Кировский район
+(7, 'missing', 'Отсутствуют баки', 'photo31.jpg', '2024-05-01', 48.660, 44.510),
+(7, 'overflow', 'Свалка у контейнеров', 'photo32.jpg', '2024-05-02', 48.662, 44.512),
+(7, 'damage', 'Контейнер без крышки', 'photo33.jpg', '2024-05-03', 48.668, 44.518),
+(7, 'overflow', 'Контейнеры не вывозят', 'photo34.jpg', '2024-05-04', 48.654, 44.506),
+(7, 'missing', 'Нет бака для пластика', 'photo35.jpg', '2024-05-05', 48.669, 44.519),
+
+-- Красноармейский район
+(8, 'overflow', 'Контейнер полон под завязку', 'photo36.jpg', '2024-05-01', 48.630, 44.490),
+(8, 'damage', 'Погнут контейнер', 'photo37.jpg', '2024-05-02', 48.638, 44.498),
+(8, 'missing', 'Не хватает баков', 'photo38.jpg', '2024-05-03', 48.622, 44.482),
+(8, 'overflow', 'Мусор рядом с баком', 'photo39.jpg', '2024-05-04', 48.636, 44.492),
+(8, 'damage', 'Разбит пластиковый бак', 'photo40.jpg', '2024-05-05', 48.628, 44.485)
+ON CONFLICT (segment_id, report_type, text, date) DO NOTHING;
+
