@@ -95,11 +95,17 @@
           "text": "Тестовое обращение номер 2! Починилось!?",
           "photo": null,
           "date": "2025-05-31"
+        },
+        {
+          "type": "замечание",
+          "text": "dsfsdfs",
+          "photo": null,
+          "date": "2025-06-01"
         }
       ]
     }
   },
   "meta": {
-    "total_reports": 11
+    "total_reports": 12
   }
 }
